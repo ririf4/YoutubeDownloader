@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Downloader</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>YouTube Downloader</h1>
+
+    <label>URL:</label>
+    <input type="text" id="urlInput" placeholder="https://youtube.com/..." />
+
+    <label>Output Folder:</label>
+    <div class="folder-picker">
+      <input type="text" id="outputDirInput" value="./downloads" />
+      <button onclick="selectFolder()" style="width: auto; padding: 0.5rem 1rem;">📁</button>
+    </div>
+
+    <label>Type:</label>
+    <select id="mediaType">
+      <option value="video">Video</option>
+      <option value="audio">Audio</option>
+    </select>
+
+    <div id="videoOptions">
+      <label>Resolution:</label>
+      <select id="resolutionSelect"></select>
+
+      <label>Video Audio Bitrate:</label>
+      <select id="videoBitrateSelect"></select>
+    </div>
+
+    <div id="audioOptions">
+      <label>Audio Bitrate:</label>
+      <select id="audioBitrateSelect"></select>
+    </div>
+
+    <label>Format:</label>
+    <select id="formatSelect"></select>
+
+    <button id="fetchOptions">Fetch Options</button>
+    <button id="startDownload">Download</button>
+
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+    <p id="status">Ready.</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
