@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 const urlInput = document.getElementById("urlInput");
 const mediaType = document.getElementById("mediaType");
 const resolutionSelect = document.getElementById("resolutionSelect");
@@ -74,13 +76,35 @@ async function fetchOptions() {
 
     window.lastOptions = data;
 
-    // Populate video/audio options
-    resolutionSelect.innerHTML = data.video.resolutions.map(r => `<option value="${r}">${r}</option>`).join("");
-    videoBitrateSelect.innerHTML = data.video.audio_bitrates.map(b => `<option value="${b}">${b}</option>`).join("");
-    audioBitrateSelect.innerHTML = data.audio.bitrates.map(b => `<option value="${b}">${b}</option>`).join("");
+    // --- Video Resolutions ---
+    resolutionSelect.innerHTML = (data.video?.resolutions ?? []).flatMap(opt =>
+      opt.source_formats.map(fmt =>
+        `<option value="${opt.resolution}|${fmt}">${opt.resolution} [${fmt}]</option>`
+      )
+    ).join("");
 
-    const formatList = mediaType.value === "video" ? data.video.formats : data.audio.formats;
-    formatSelect.innerHTML = formatList.map(f => `<option value="${f}">${f}</option>`).join("");
+    // --- Video Audio Bitrates ---
+    videoBitrateSelect.innerHTML = (data.video?.audio_bitrates ?? []).flatMap(opt =>
+      opt.source_formats.map(fmt =>
+        `<option value="${opt.bitrate}|${fmt}">${opt.bitrate} [${fmt}]</option>`
+      )
+    ).join("");
+
+    // --- Audio Bitrates ---
+    audioBitrateSelect.innerHTML = (data.audio?.bitrates ?? []).flatMap(opt =>
+      opt.source_formats.map(fmt =>
+        `<option value="${opt.bitrate}|${fmt}">${opt.bitrate} [${fmt}]</option>`
+      )
+    ).join("");
+
+    // --- Format List ---
+    const formatList = mediaType.value === "video"
+      ? data.video?.formats ?? []
+      : data.audio?.formats ?? [];
+
+    formatSelect.innerHTML = formatList.map(f =>
+      `<option value="${f}">${f}</option>`
+    ).join("");
 
     statusText.innerText = "Options loaded.";
   } catch (err) {
@@ -88,7 +112,6 @@ async function fetchOptions() {
     statusText.innerText = "Error: Failed to fetch options. See console.";
   }
 }
-
 
 async function startDownload() {
   const url = urlInput.value.trim();
@@ -100,15 +123,21 @@ async function startDownload() {
     return;
   }
 
+  const resolutionFormat = (resolutionSelect.value || "").split("|");
+  const videoBitrateFormat = (videoBitrateSelect.value || "").split("|");
+  const audioBitrateFormat = (audioBitrateSelect.value || "").split("|");
+
   const payload = {
     url,
     type,
     format: formatSelect.value,
-    resolution: type === "video" ? resolutionSelect.value : null,
-    video_bitrate: type === "video" ? videoBitrateSelect.value : null,
-    audio_bitrate: type === "audio" ? audioBitrateSelect.value : null,
+    resolution: type === "video" ? resolutionFormat[0] : null,
+    video_bitrate: type === "video" ? videoBitrateFormat[0] : null,
+    audio_bitrate: type === "audio" ? audioBitrateFormat[0] : null,
     output_dir: outputDir
   };
+
+  console.log("Download payload:", payload);
 
   progressBar.style.width = "0%";
   statusText.innerText = "Downloading...";

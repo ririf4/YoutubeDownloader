@@ -1,14 +1,16 @@
+import subprocess
 import traceback
+from typing import List
 from urllib.parse import parse_qs, urlparse
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from starlette.middleware import Middleware
-from fastapi.middleware.cors import CORSMiddleware
 from yt_dlp import YoutubeDL
 
 from downloader import YouTubeDownloader
-import subprocess
+
 app = FastAPI(
     middleware=[
         Middleware(
@@ -30,6 +32,31 @@ class DownloadRequest(BaseModel):
     audio_bitrate: str | None = None
     output_dir: str = "./downloads"
 
+
+class ResolutionOption(BaseModel):
+    resolution: str
+    source_formats: List[str]
+
+
+class BitrateOption(BaseModel):
+    bitrate: str
+    source_formats: List[str]
+
+
+class VideoOptions(BaseModel):
+    resolutions: List[ResolutionOption]
+    audio_bitrates: List[BitrateOption]
+    formats: List[str]
+
+
+class AudioOptions(BaseModel):
+    bitrates: List[BitrateOption]
+    formats: List[str]
+
+
+class OptionsResponse(BaseModel):
+    video: VideoOptions
+    audio: AudioOptions
 class OptionsRequest(BaseModel):
     url: str
 
@@ -73,36 +100,80 @@ async def get_options(req: OptionsRequest):
         url = clean_url(req.url)
         print(">>> Clean URL:", url)
         info = extract_info(url)
-        print(">>> Info: ", info)
+        print(">>> Info:", info)
 
-        video_streams = [f for f in info["formats"] if f.get("vcodec") != "none" and f.get("acodec") != "none"]
-        audio_streams = [f for f in info["formats"] if f.get("vcodec") == "none"]
+        formats = info["formats"]
 
-        resolutions = sorted(
-            {f"{f['height']}p" for f in video_streams if f.get("height")},
-            key=lambda r: int(r.replace("p", "")), reverse=True
-        )
+        # ───── VIDEO STREAMS ─────
+        video_streams = [
+            f for f in formats
+            if f.get("vcodec") != "none" and f.get("height")
+        ]
 
-        audio_bitrates = sorted(
-            {f"{int(f['abr'])}k" for f in audio_streams if f.get("abr")},
-            key=lambda b: int(b.replace("k", "")), reverse=True
-        )
+        # {解像度: [使用されている拡張子]}
+        video_resolution_map = {}
+        for f in video_streams:
+            height = f.get("height")
+            ext = f.get("ext")
+            res = f"{height}p"
+            video_resolution_map.setdefault(res, set()).add(ext)
 
+        # ───── AUDIO STREAMS ─────
+        audio_streams = [
+            f for f in formats if f.get("vcodec") == "none" and f.get("abr")
+        ]
+
+        # {bitrate: [使用されている拡張子]}
+        audio_bitrate_map = {}
+        for f in audio_streams:
+            bitrate = f"{int(f.get('abr'))}k"
+            ext = f.get("ext")
+            audio_bitrate_map.setdefault(bitrate, set()).add(ext)
+
+        # ───── フォーマット一覧（FFmpeg）─────
         ffmpeg_formats = get_ffmpeg_formats()
         audio_formats = [f for f in ffmpeg_formats if f in ["mp3", "wav", "ogg", "flac", "m4a", "aac", "opus"]]
         video_formats = [f for f in ffmpeg_formats if f in ["mp4", "mkv", "avi", "webm", "mov"]]
 
-        return {
-            "video": {
-                "resolutions": resolutions,
-                "audio_bitrates": audio_bitrates,
-                "formats": video_formats
-            },
-            "audio": {
-                "bitrates": audio_bitrates,
-                "formats": audio_formats
-            }
-        }
+        # ───── 構造を整形して返す ─────
+        return OptionsResponse(
+            video=VideoOptions(
+                resolutions=[
+                    ResolutionOption(
+                        resolution=res,
+                        source_formats=list(exts)
+                    ) for res, exts in sorted(
+                        video_resolution_map.items(),
+                        key=lambda x: int(x[0].replace("p", "")),
+                        reverse=True
+                    )
+                ],
+                audio_bitrates=[
+                    BitrateOption(
+                        bitrate=bitrate,
+                        source_formats=list(exts)
+                    ) for bitrate, exts in sorted(
+                        audio_bitrate_map.items(),
+                        key=lambda x: int(x[0].replace("k", "")),
+                        reverse=True
+                    )
+                ],
+                formats=video_formats
+            ),
+            audio=AudioOptions(
+                bitrates=[
+                    BitrateOption(
+                        bitrate=bitrate,
+                        source_formats=list(exts)
+                    ) for bitrate, exts in sorted(
+                        audio_bitrate_map.items(),
+                        key=lambda x: int(x[0].replace("k", "")),
+                        reverse=True
+                    )
+                ],
+                formats=audio_formats
+            )
+        )
 
     except Exception as e:
         print("[/options ERROR]")
@@ -112,21 +183,26 @@ async def get_options(req: OptionsRequest):
 @app.post("/download")
 async def download(req: DownloadRequest):
     try:
+        resolution, res_fmt = (req.resolution or "720p|mp4").split("|") if req.resolution else ("720p", req.format)
+        video_bitrate, vid_fmt = (req.video_bitrate or "128k|mp4").split("|") if req.video_bitrate else ("128k", req.format)
+        audio_bitrate, aud_fmt = (req.audio_bitrate or "128k|mp3").split("|") if req.audio_bitrate else ("128k", req.format)
+
         if req.type == "audio":
             path = yt_downloader.download_audio(
                 url=req.url,
-                file_format=req.format,
-                bitrate=req.audio_bitrate or "128k",
+                file_format=aud_fmt,
+                bitrate=audio_bitrate,
                 output_dir=req.output_dir
             )
         else:
             path = yt_downloader.download_video(
                 url=req.url,
-                resolution=req.resolution or "720p",
-                file_format=req.format,
-                audio_bitrate=req.video_bitrate or "128k",
+                resolution=resolution,
+                file_format=res_fmt,
+                audio_bitrate=video_bitrate,
                 output_dir=req.output_dir
             )
+
         return {"status": "success", "file": path}
     except Exception as e:
         return {"status": "error", "message": str(e)}

@@ -1,10 +1,8 @@
-import os
 import datetime
 from pathlib import Path
 from yt_dlp import YoutubeDL
 
 from main import get_ffmpeg_path
-
 
 # noinspection DuplicatedCode
 class YouTubeDownloader:
@@ -66,10 +64,10 @@ class YouTubeDownloader:
         if supports_thumbnail:
             ydl_opts['writethumbnail'] = True
             ydl_opts.setdefault('postprocessors', [])
-            ydl_opts['postprocessors'].extend([
-                {'key': 'FFmpegMetadata'},
-                {'key': 'EmbedThumbnail'}
-            ])
+            ydl_opts['postprocessors'].append({
+                'key': 'FFmpegEmbedThumbnail',
+                'already_have_thumbnail': False
+            })
 
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
