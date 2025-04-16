@@ -7,42 +7,48 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
+<div id="themeToggleWrapper">
+  <button id="themeToggle">Toggle Dark Mode 🌙</button>
+</div>
+
+<div class="container">
+  <div class="form-section">
     <h1>YouTube Downloader</h1>
 
-    <label>URL:</label>
-    <input type="text" id="urlInput" placeholder="https://youtube.com/..." />
+    <label for="urlInput">URL:</label>
+    <input id="urlInput" placeholder="https://youtube.com/..." type="text"/>
 
-    <label>Output Folder:</label>
+    <label for="outputDirInput">Output Folder:</label>
     <div class="folder-picker">
-      <input type="text" id="outputDirInput" value="./downloads" />
-      <button onclick="selectFolder()" style="width: auto; padding: 0.5rem 1rem;">📁</button>
+      <input id="outputDirInput" type="text" value="./downloads"/>
+      <button onclick="selectFolder()">📁</button>
     </div>
 
-    <label>Type:</label>
+    <label for="mediaType">Type:</label>
     <select id="mediaType">
       <option value="video">Video</option>
       <option value="audio">Audio</option>
     </select>
 
     <div id="videoOptions">
-      <label>Resolution:</label>
+      <label for="resolutionSelect">Resolution:</label>
       <select id="resolutionSelect"></select>
 
-      <label>Video Audio Bitrate:</label>
+      <label for="videoBitrateSelect">Video Audio Bitrate:</label>
       <select id="videoBitrateSelect"></select>
     </div>
 
     <div id="audioOptions">
-      <label>Audio Bitrate:</label>
+      <label for="audioBitrateSelect">Audio Bitrate:</label>
       <select id="audioBitrateSelect"></select>
     </div>
 
-    <label>Format:</label>
+    <label for="formatSelect">Format:</label>
     <select id="formatSelect"></select>
 
-    <button id="fetchOptions">Fetch Options</button>
+    <button id="fetchOptions">Get Video Details</button>
     <button id="startDownload">Download</button>
+    <ul id="downloadQueue"></ul>
 
     <div class="progress">
       <div id="progressBar"></div>
@@ -50,6 +56,12 @@
     <p id="status">Ready.</p>
   </div>
 
-  <script src="script.js"></script>
+  <div class="preview-section" id="previewSection" style="display: none;">
+    <img alt="Thumbnail" id="thumbnail"/>
+    <iframe allowfullscreen id="previewFrame"></iframe>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

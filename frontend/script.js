@@ -16,6 +16,9 @@ const statusText = document.getElementById("status");
 
 document.getElementById("fetchOptions").addEventListener("click", fetchOptions);
 document.getElementById("startDownload").addEventListener("click", startDownload);
+document.getElementById("themeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+});
 mediaType.addEventListener("change", updateUI);
 
 updateUI();
@@ -111,6 +114,13 @@ async function fetchOptions() {
     console.error("Failed to fetch options:", err);
     statusText.innerText = "Error: Failed to fetch options. See console.";
   }
+
+  const videoId = new URL(url).searchParams.get("v");
+  if (videoId) {
+    document.getElementById("thumbnail").src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    document.getElementById("previewFrame").src = `https://www.youtube.com/embed/${videoId}`;
+    document.getElementById("previewSection").style.display = "block";
+  }
 }
 
 async function startDownload() {
@@ -132,8 +142,13 @@ async function startDownload() {
     type,
     format: formatSelect.value,
     resolution: type === "video" ? resolutionFormat[0] : null,
-    video_bitrate: type === "video" ? videoBitrateFormat[0] : null,
-    audio_bitrate: type === "audio" ? audioBitrateFormat[0] : null,
+    resolution_format: type === "video" ? resolutionFormat[1] : null,
+    audio_bitrate: type === "video"
+        ? videoBitrateFormat[0]
+        : audioBitrateFormat[0],
+    audio_format: type === "video"
+        ? videoBitrateFormat[1]
+        : audioBitrateFormat[1],
     output_dir: outputDir
   };
 

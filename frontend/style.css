@@ -9,12 +9,78 @@ body {
     height: 100vh;
 }
 
+body.dark {
+    background: #121212;
+    color: #eee;
+}
+
+#themeToggleWrapper {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+#themeToggle {
+    background: #222;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+#themeToggle:hover {
+    background: #444;
+}
+
+body.dark #themeToggle {
+    background: #ddd;
+    color: #222;
+}
+
+body.dark #themeToggle:hover {
+    background: #bbb;
+}
+
 .container {
-    background: #fff;
+    display: flex;
+    gap: 2rem;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    background: #fff;
+    width: 900px;
+}
+
+body.dark .container {
+    background: #1e1e1e;
+}
+
+.form-section {
+    flex: 1;
+}
+
+.preview-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.preview-section img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.preview-section iframe {
+    width: 100%;
+    height: 240px;
+    border: none;
+    border-radius: 4px;
 }
 
 h1 {
@@ -35,6 +101,48 @@ select {
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+.folder-picker {
+    display: flex;
+    width: 100%;
+}
+
+.folder-picker input[type="text"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    flex-grow: 1;
+}
+
+.folder-picker button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    width: 3rem;
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    cursor: pointer;
+    margin-top: 0;
+}
+
+.folder-picker button:hover {
+    background-color: #0056b3;
+}
+
+body.dark .folder-picker input[type="text"] {
+    background: #333;
+    color: #eee;
+    border-color: #555;
+}
+
+body.dark .folder-picker button {
+    background-color: #444;
+    border-color: #555;
+}
+
+body.dark .folder-picker button:hover {
+    background-color: #666;
 }
 
 button {
@@ -73,4 +181,36 @@ button:hover {
     text-align: center;
     font-size: 0.9rem;
     color: #333;
+}
+
+body.dark #status {
+    color: #ccc;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-content {
+    background: #fff;
+    color: #000;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .overlay-content {
+    background: #1e1e1e;
+    color: #eee;
 }

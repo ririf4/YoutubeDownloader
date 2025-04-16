@@ -25,11 +25,12 @@ yt_downloader = YouTubeDownloader()
 
 class DownloadRequest(BaseModel):
     url: str
-    type: str
-    format: str
+    type: str                     # "video" or "audio"
+    format: str                   # 最終出力形式（例: mp4）
     resolution: str | None = None
-    video_bitrate: str | None = None
+    resolution_format: str | None = None
     audio_bitrate: str | None = None
+    audio_format: str | None = None
     output_dir: str = "./downloads"
 
 
@@ -183,26 +184,38 @@ async def get_options(req: OptionsRequest):
 @app.post("/download")
 async def download(req: DownloadRequest):
     try:
-        resolution, res_fmt = (req.resolution or "720p|mp4").split("|") if req.resolution else ("720p", req.format)
-        video_bitrate, vid_fmt = (req.video_bitrate or "128k|mp4").split("|") if req.video_bitrate else ("128k", req.format)
-        audio_bitrate, aud_fmt = (req.audio_bitrate or "128k|mp3").split("|") if req.audio_bitrate else ("128k", req.format)
+        print("[/download] Received payload:", req.model_dump())
+
+        resolution = req.resolution or "720p"
+        resolution_format = req.resolution_format or req.format
+        audio_bitrate = req.audio_bitrate or "128k"
+        audio_format = req.audio_format or req.format
+        output_format = req.format
 
         if req.type == "audio":
             path = yt_downloader.download_audio(
                 url=req.url,
-                file_format=aud_fmt,
+                file_format=audio_format,
                 bitrate=audio_bitrate,
-                output_dir=req.output_dir
+                output_dir=req.output_dir,
+                output_format=output_format
             )
-        else:
+        elif req.type == "video":
             path = yt_downloader.download_video(
                 url=req.url,
                 resolution=resolution,
-                file_format=res_fmt,
-                audio_bitrate=video_bitrate,
-                output_dir=req.output_dir
+                file_format=resolution_format,
+                audio_bitrate=audio_bitrate,
+                output_dir=req.output_dir,
+                output_format=output_format,
+                audio_format=audio_format
             )
+        else:
+            return {"status": "error", "message": f"Invalid type: {req.type}"}
 
         return {"status": "success", "file": path}
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"status": "error", "message": str(e)}
