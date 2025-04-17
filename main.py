@@ -1,16 +1,15 @@
-import shutil
-import sys
-
-import webview
-import threading
 import os
-import zipfile
-import urllib.request
-from pathlib import Path
-from pydub import AudioSegment
+import shutil
+import threading
 import tkinter as tk
+import urllib.request
+import zipfile
+from pathlib import Path
 from tkinter import filedialog
+
 import uvicorn
+import webview
+from pydub import AudioSegment
 
 import server
 
@@ -23,6 +22,10 @@ class Api:
         root.withdraw()
         folder = filedialog.askdirectory()
         return folder or ""
+
+    def open_file_location(self, path: str):
+        import subprocess
+        subprocess.Popen(f'explorer /select,"{path}"')
 
 def get_ffmpeg_dir():
     appdata = Path(os.getenv("LOCALAPPDATA") or Path.home())
@@ -75,5 +78,5 @@ if __name__ == "__main__":
 
     threading.Thread(target=start_fastapi, daemon=True).start()
 
-    webview.create_window("YouTube Downloader", "frontend/index.html", js_api=api, width=800, height=700)
-    webview.start(debug=True)
+    webview.create_window("YouTube Downloader", "frontend/index.html", js_api=api, width=1300, height=1000, resizable=False)
+    webview.start(debug=False)

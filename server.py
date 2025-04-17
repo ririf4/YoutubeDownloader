@@ -37,25 +37,21 @@ class DownloadRequest(BaseModel):
 class ResolutionOption(BaseModel):
     resolution: str
     source_formats: List[str]
-
-
 class BitrateOption(BaseModel):
     bitrate: str
     source_formats: List[str]
-
-
 class VideoOptions(BaseModel):
     resolutions: List[ResolutionOption]
     audio_bitrates: List[BitrateOption]
     formats: List[str]
-
-
 class AudioOptions(BaseModel):
     bitrates: List[BitrateOption]
     formats: List[str]
-
-
 class OptionsResponse(BaseModel):
+    title: str
+    channel: str
+    upload_date: str
+    duration: int
     video: VideoOptions
     audio: AudioOptions
 class OptionsRequest(BaseModel):
@@ -138,6 +134,10 @@ async def get_options(req: OptionsRequest):
 
         # ───── 構造を整形して返す ─────
         return OptionsResponse(
+            title=info.get("title", "Unknown"),
+            channel=info.get("uploader", "Unknown"),
+            upload_date=info.get("upload_date", "")[:4] + "-" + info.get("upload_date", "")[4:6] + "-" + info.get("upload_date", "")[6:],
+            duration=info.get("duration", 0),
             video=VideoOptions(
                 resolutions=[
                     ResolutionOption(
@@ -195,7 +195,7 @@ async def download(req: DownloadRequest):
         if req.type == "audio":
             path = yt_downloader.download_audio(
                 url=req.url,
-                file_format=audio_format,
+                file_format=output_format,
                 bitrate=audio_bitrate,
                 output_dir=req.output_dir,
                 output_format=output_format

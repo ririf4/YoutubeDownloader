@@ -1,8 +1,10 @@
 import datetime
 from pathlib import Path
+
 from yt_dlp import YoutubeDL
 
 from main import get_ffmpeg_dir
+
 
 # noinspection DuplicatedCode
 class YouTubeDownloader:
@@ -112,4 +114,3 @@ class YouTubeDownloader:
                 return str(output_path)
             else:
                 raise FileNotFoundError(f"Could not locate downloaded file: {output_path.name}")
-

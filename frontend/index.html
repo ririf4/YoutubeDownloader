@@ -6,6 +6,9 @@
   <title>YouTube Downloader</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+<div class="lightbox" id="lightboxOverlay" style="display: none;">
+  <img id="lightboxImage"/>
+</div>
 <body>
 <div id="themeToggleWrapper">
   <button id="themeToggle">Toggle Dark Mode 🌙</button>
@@ -60,6 +63,13 @@
     <img alt="Thumbnail" id="thumbnail"/>
     <iframe allowfullscreen id="previewFrame"></iframe>
   </div>
+  <div class="video-meta" id="videoMeta" style="display: none;">
+    <h3><a href="#" id="videoTitleLink" target="_blank"></a></h3>
+    <p>Channel: <strong id="channelName">-</strong></p>
+    <p>Published: <span id="publishDate">-</span></p>
+    <p>Duration: <span id="videoDuration">-</span></p>
+  </div>
+
 </div>
 
 <script src="script.js"></script>

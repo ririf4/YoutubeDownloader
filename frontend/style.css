@@ -1,17 +1,26 @@
 body {
     font-family: sans-serif;
-    background: #f4f4f4;
     margin: 0;
     padding: 0;
+    background: #f4f4f4;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 body.dark {
     background: #121212;
     color: #eee;
+}
+
+body.dark .container {
+    background: #1e1e1e;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+body.dark #status {
+    color: #ccc;
 }
 
 #themeToggleWrapper {
@@ -31,58 +40,35 @@ body.dark {
     cursor: pointer;
     font-size: 0.9rem;
 }
-
 #themeToggle:hover {
     background: #444;
 }
-
 body.dark #themeToggle {
     background: #ddd;
     color: #222;
 }
-
 body.dark #themeToggle:hover {
     background: #bbb;
 }
 
+/* === メインコンテナ（横並び） === */
 .container {
     display: flex;
     gap: 2rem;
     padding: 2rem;
+    background: #fff;
     border-radius: 8px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-    background: #fff;
-    width: 900px;
-}
-
-body.dark .container {
-    background: #1e1e1e;
-}
-
-.form-section {
-    flex: 1;
-}
-
-.preview-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.preview-section img {
+    max-width: 900px;
     width: 100%;
-    border-radius: 4px;
 }
 
-.preview-section iframe {
-    width: 100%;
-    height: 240px;
-    border: none;
-    border-radius: 4px;
+.form-section, .preview-section {
+    flex: 1;
+    min-width: 0;
 }
 
+/* === フォーム側 === */
 h1 {
     text-align: center;
     margin-bottom: 1rem;
@@ -105,27 +91,23 @@ select {
 
 .folder-picker {
     display: flex;
-    width: 100%;
 }
-
 .folder-picker input[type="text"] {
+    flex-grow: 1;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-right: none;
-    flex-grow: 1;
 }
-
 .folder-picker button {
+    width: 3rem;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    width: 3rem;
     background-color: #007bff;
     color: white;
     border: 1px solid #007bff;
     cursor: pointer;
     margin-top: 0;
 }
-
 .folder-picker button:hover {
     background-color: #0056b3;
 }
@@ -135,12 +117,10 @@ body.dark .folder-picker input[type="text"] {
     color: #eee;
     border-color: #555;
 }
-
 body.dark .folder-picker button {
     background-color: #444;
     border-color: #555;
 }
-
 body.dark .folder-picker button:hover {
     background-color: #666;
 }
@@ -156,18 +136,17 @@ button {
     border-radius: 4px;
     cursor: pointer;
 }
-
 button:hover {
     background-color: #0056b3;
 }
 
+/* === プログレスバーとステータス === */
 .progress {
     width: 100%;
     background-color: #ddd;
     border-radius: 4px;
     margin-top: 1rem;
 }
-
 #progressBar {
     height: 20px;
     width: 0;
@@ -175,7 +154,6 @@ button:hover {
     border-radius: 4px;
     transition: width 0.3s;
 }
-
 #status {
     margin-top: 0.5rem;
     text-align: center;
@@ -183,34 +161,71 @@ button:hover {
     color: #333;
 }
 
-body.dark #status {
+/* === プレビュー側 === */
+.preview-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.preview-section img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.preview-section iframe {
+    width: 100%;
+    height: 240px;
+    border: none;
+    border-radius: 4px;
+}
+
+.video-meta {
+    text-align: center;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    color: #333;
+}
+
+.video-meta a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.video-meta a:hover {
+    text-decoration: underline;
+}
+
+body.dark .video-meta {
     color: #ccc;
 }
 
-.overlay {
+body.dark .video-meta a {
+    color: #4fa3ff;
+}
+
+.lightbox {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    z-index: 999;
+    cursor: zoom-out;
 }
 
-.overlay-content {
-    background: #fff;
-    color: #000;
-    padding: 2rem;
+.lightbox img {
+    max-width: 80vw;
+    max-height: 80vh;
     border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-body.dark .overlay-content {
-    background: #1e1e1e;
-    color: #eee;
+body.dark .lightbox {
+    background: rgba(0, 0, 0, 0.9);
 }

@@ -14,12 +14,23 @@ const audioOptions = document.getElementById("audioOptions");
 const progressBar = document.getElementById("progressBar");
 const statusText = document.getElementById("status");
 
+const thumbnail = document.getElementById("thumbnail");
+const lightbox = document.getElementById("lightboxOverlay");
+const lightboxImage = document.getElementById("lightboxImage");
+
 document.getElementById("fetchOptions").addEventListener("click", fetchOptions);
 document.getElementById("startDownload").addEventListener("click", startDownload);
 document.getElementById("themeToggle").addEventListener("click", () => {
   document.body.classList.toggle("dark");
 });
 mediaType.addEventListener("change", updateUI);
+thumbnail.addEventListener("click", () => {
+  lightboxImage.src = thumbnail.src;
+  lightbox.style.display = "flex";
+});
+lightbox.addEventListener("click", () => {
+  lightbox.style.display = "none";
+});
 
 updateUI();
 
@@ -46,6 +57,40 @@ function updateUI() {
       : window.lastOptions.audio.formats;
 
     formatSelect.innerHTML = formatList.map(f => `<option value="${f}">${f}</option>`).join("");
+  }
+}
+
+function formatDuration(seconds) {
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return `${min}:${sec.toString().padStart(2, "0")}`;
+}
+
+function extractVideoId(url) {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname;
+    const path = parsed.pathname;
+
+    if (parsed.searchParams.has("v")) {
+      return parsed.searchParams.get("v");
+    } else if (hostname.includes("youtube.com") && path.startsWith("/shorts/")) {
+      return path.split("/")[2]; // shorts/XXXXXXXX
+    } else if (hostname === "youtu.be") {
+      return path.slice(1); // youtu.be/XXXXXXXX
+    }
+  } catch (e) {
+    console.error("Invalid URL:", url);
+  }
+
+  return null;
+}
+
+function openFileLocation(path) {
+  if (window.pywebview && window.pywebview.api.open_file_location) {
+    window.pywebview.api.open_file_location(path);
+  } else {
+    alert("This feature only works in the desktop app.");
   }
 }
 
@@ -110,16 +155,23 @@ async function fetchOptions() {
     ).join("");
 
     statusText.innerText = "Options loaded.";
+
+    const videoId = extractVideoId(url);
+    if (videoId) {
+      document.getElementById("thumbnail").src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      document.getElementById("previewFrame").src = `https://www.youtube.com/embed/${videoId}`;
+      document.getElementById("previewSection").style.display = "block";
+
+      document.getElementById("videoTitleLink").textContent = data.title;
+      document.getElementById("videoTitleLink").href = `https://www.youtube.com/watch?v=${videoId}`;
+      document.getElementById("channelName").textContent = data.channel || "Unknown";
+      document.getElementById("publishDate").textContent = data.upload_date || "-";
+      document.getElementById("videoDuration").textContent = formatDuration(data.duration || 0);
+      document.getElementById("videoMeta").style.display = "block";
+    }
   } catch (err) {
     console.error("Failed to fetch options:", err);
     statusText.innerText = "Error: Failed to fetch options. See console.";
-  }
-
-  const videoId = new URL(url).searchParams.get("v");
-  if (videoId) {
-    document.getElementById("thumbnail").src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-    document.getElementById("previewFrame").src = `https://www.youtube.com/embed/${videoId}`;
-    document.getElementById("previewSection").style.display = "block";
   }
 }
 
@@ -177,7 +229,10 @@ async function startDownload() {
 
   if (result.status === "success") {
     progressBar.style.width = "100%";
-    statusText.innerText = "Download complete:\n" + result.file;
+    statusText.innerHTML = `Download complete:<br>
+    <a href="#" onclick="openFileLocation('${result.file.replace(/\\/g, '\\\\')}')">
+      ${result.file}
+    </a>`;
   } else {
     progressBar.style.width = "0%";
     statusText.innerText = "Error: " + result.message;
