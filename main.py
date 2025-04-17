@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 import threading
 import tkinter as tk
 import urllib.request
@@ -15,6 +16,8 @@ import server
 
 BIN_DIR = Path("bin")
 FFMPEG_EXE = BIN_DIR / "ffmpeg.exe"
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 class Api:
     def select_folder(self):

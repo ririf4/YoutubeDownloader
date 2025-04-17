@@ -35,7 +35,8 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True  # ← Trueなら黒いコンソール付き、Falseなら完全GUI
+    console=False,
+    icon='assets/icon.ico'
 )
 
 coll = COLLECT(
