@@ -2,3 +2,7 @@
 bin
 build
 dist
+.kotlin
+.idea
+.gradle
+downloads
